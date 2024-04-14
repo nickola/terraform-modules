@@ -16,6 +16,19 @@ variable "handler" {
 variable "source_file" {
   description = "Source file."
   type        = string
+  default     = null
+}
+
+variable "source_directory" {
+  description = "Source directory."
+  type        = string
+  default     = null
+}
+
+variable "source_directory_excludes" {
+  description = "Source directory excludes."
+  type        = list
+  default     = [".git", ".gitignore", ".gitmodules", ".venv"]
 }
 
 variable "url_enabled" {

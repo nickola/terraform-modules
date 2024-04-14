@@ -23,8 +23,10 @@ resource "aws_iam_role" "lambda_role" {
 
 data "archive_file" "lambda_archive" {
   type        = "zip"
+  source_dir  = var.source_directory
   source_file = var.source_file
   output_path = "_lambda.zip"
+  excludes = var.source_file == null ? var.source_directory_excludes : null
 }
 
 resource "aws_lambda_function" "lambda" {
