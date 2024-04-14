@@ -27,7 +27,7 @@ variable "source_directory" {
 
 variable "source_directory_excludes" {
   description = "Source directory excludes."
-  type        = list
+  type        = list(string)
   default     = [".git", ".gitignore", ".gitmodules", ".venv"]
 }
 
