@@ -1,33 +1,6 @@
 # S3 access
 resource "aws_cloudfront_origin_access_identity" "cloudfront_access_identity" {
-  count   = var.s3_bucket_create_policy ? 1 : 0
   comment = var.description
-}
-
-resource "aws_s3_bucket_policy" "cloudfront_access_policy" {
-  count  = var.s3_bucket_create_policy ? 1 : 0
-  bucket = var.s3_bucket_id
-
-  policy = <<-DATA
-    {
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Sid": "CloudFrontRead",
-          "Effect": "Allow",
-          "Principal": {
-            "AWS": [
-              "${aws_cloudfront_origin_access_identity.cloudfront_access_identity[0].iam_arn}"
-            ]
-          },
-          "Action": ["s3:GetObject"],
-          "Resource": [
-            "${data.aws_s3_bucket.bucket.arn}/*"
-          ]
-        }
-      ]
-    }
-  DATA
 }
 
 # S3 files
@@ -113,12 +86,8 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
     origin_id   = "default-s3"
     domain_name = data.aws_s3_bucket.bucket.bucket_regional_domain_name
 
-    dynamic "s3_origin_config" {
-      for_each = var.s3_bucket_create_policy ? ["+"] : []
-
-      content {
-        origin_access_identity = aws_cloudfront_origin_access_identity.cloudfront_access_identity[0].cloudfront_access_identity_path
-      }
+    s3_origin_config {
+      origin_access_identity = aws_cloudfront_origin_access_identity.cloudfront_access_identity.cloudfront_access_identity_path
     }
   }
 
@@ -127,7 +96,7 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
 
     viewer_protocol_policy = "redirect-to-https"
     allowed_methods        = var.allowed_methods
-    cached_methods         = var.cached_methods
+    cached_methods         = coalesce(var.cached_methods, var.allowed_methods)
     compress               = true
 
     default_ttl = var.ttl
@@ -145,7 +114,7 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
 
   # Rules (origins / behaviors)
   dynamic "origin" {
-    for_each = (var.rules != null && length(var.rules) > 0) ? var.rules : []
+    for_each = var.rules != null ? var.rules : []
 
     content {
       origin_id   = origin.value.url
@@ -162,7 +131,7 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
   }
 
   dynamic "ordered_cache_behavior" {
-    for_each = (var.rules != null && length(var.rules) > 0) ? var.rules : []
+    for_each = var.rules != null ? var.rules : []
 
     content {
       target_origin_id = ordered_cache_behavior.value.url
@@ -170,7 +139,7 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
 
       viewer_protocol_policy = "redirect-to-https"
       allowed_methods        = coalesce(lookup(ordered_cache_behavior.value, "allowed_methods", null), var.allowed_methods)
-      cached_methods         = coalesce(lookup(ordered_cache_behavior.value, "cached_methods", null), var.cached_methods)
+      cached_methods         = coalesce(lookup(ordered_cache_behavior.value, "cached_methods", null), coalesce(lookup(ordered_cache_behavior.value, "allowed_methods", null), coalesce(var.cached_methods, var.allowed_methods)))
       compress               = true
 
       default_ttl = coalesce(lookup(ordered_cache_behavior.value, "ttl", null), var.ttl)
@@ -189,6 +158,10 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
 }
 
 # Outputs
+output "access_identity" {
+  value = aws_cloudfront_origin_access_identity.cloudfront_access_identity.iam_arn
+}
+
 output "status" {
   value = {
     aliases     = aws_cloudfront_distribution.cloudfront_distribution.aliases

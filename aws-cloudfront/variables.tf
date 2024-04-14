@@ -20,7 +20,7 @@ variable "allowed_methods" {
 variable "cached_methods" {
   description = "Cached methods."
   type        = list(string)
-  default     = ["GET", "HEAD", "OPTIONS"]
+  default     = null
 }
 
 variable "geo_restriction" {
@@ -34,12 +34,6 @@ variable "s3_bucket_id" {
   description = "S3 bucket ID."
   type        = string
   default     = ""
-}
-
-variable "s3_bucket_create_policy" {
-  description = "Create S3 bucket policy for CloudFront."
-  type        = bool
-  default     = false
 }
 
 variable "domain_alias" {

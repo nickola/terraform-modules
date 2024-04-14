@@ -31,6 +31,12 @@ variable "source_directory_excludes" {
   default     = [".git", ".gitignore", ".gitmodules", ".venv"]
 }
 
+variable "environment" {
+  description = "Environment variables."
+  type        = map(string)
+  default     = null
+}
+
 variable "url_enabled" {
   description = "Enable Lambda function URL."
   type        = bool

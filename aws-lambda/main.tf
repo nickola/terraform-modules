@@ -25,7 +25,7 @@ data "archive_file" "lambda_archive" {
   type        = "zip"
   source_dir  = var.source_directory
   source_file = var.source_file
-  output_path = "_lambda.zip"
+  output_path = "_lambda-${var.name}.zip"
   excludes = var.source_file == null ? var.source_directory_excludes : null
 }
 
@@ -36,8 +36,12 @@ resource "aws_lambda_function" "lambda" {
   runtime       = var.runtime
   handler       = var.handler
 
-  filename         = "_lambda.zip"
+  filename         = "_lambda-${var.name}.zip"
   source_code_hash = data.archive_file.lambda_archive.output_base64sha256
+
+  environment {
+    variables = var.environment
+  }
 }
 
 resource "aws_lambda_function_url" "lambda_url" {
@@ -48,6 +52,11 @@ resource "aws_lambda_function_url" "lambda_url" {
 }
 
 # Output
+
+output "role" {
+  value = aws_iam_role.lambda_role.arn
+}
+
 output "url" {
   value = var.url_enabled ? aws_lambda_function_url.lambda_url[0].function_url : ""
 }
