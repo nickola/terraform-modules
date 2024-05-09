@@ -1,6 +1,6 @@
 # DynamoDB
-variable "name" {
-  description = "Name."
+variable "table" {
+  description = "Table."
   type        = string
 }
 
