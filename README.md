@@ -36,7 +36,7 @@ output "aws_s3" { value = module.aws_s3.status }
 
 Output:
 ```terraform
-s3_status = {
+aws_s3 = {
   "bucket_arn" = "arn:aws:s3:::test-bucket"
   "bucket_domain" = "test-bucket.s3.amazonaws.com"
   "bucket_public_read" = true
@@ -68,7 +68,7 @@ output "aws_lambda" { value = module.aws_lambda.status }
 
 Output:
 ```terraform
-lambda = {
+aws_lambda = {
   "lambda_arn" = "arn:aws:lambda:us-east-1:123456789012:function:test-lambda"
   "lambda_url" = "https://abcdefghijklmnopqrstuvwxyz123456.lambda-url.us-east-1.on.aws/"
 }

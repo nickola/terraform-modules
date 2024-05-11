@@ -42,3 +42,9 @@ variable "url_enabled" {
   type        = bool
   default     = false
 }
+
+variable "policy" {
+  description = "Lambda role policy."
+  type        = string
+  default     = null
+}

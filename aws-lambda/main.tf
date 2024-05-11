@@ -51,8 +51,22 @@ resource "aws_lambda_function_url" "lambda_url" {
   authorization_type = "NONE"
 }
 
-# Output
+# Policy
+resource "aws_iam_policy" "lambda_policy" {
+  count = var.policy != null ? 1 : 0
 
+  name   = "${var.name}-lambda-policy"
+  policy = var.policy
+}
+
+resource "aws_iam_role_policy_attachment" "test-attach" {
+  count = var.policy != null ? 1 : 0
+
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = aws_iam_policy.lambda_policy[0].arn
+}
+
+# Output
 output "role" {
   value = aws_iam_role.lambda_role.arn
 }
