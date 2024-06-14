@@ -35,6 +35,8 @@ resource "aws_lambda_function" "lambda" {
   function_name = var.name
   runtime       = var.runtime
   handler       = var.handler
+  memory_size   = var.memory
+  timeout       = var.timeout
 
   filename         = "_lambda-${var.name}.zip"
   source_code_hash = data.archive_file.lambda_archive.output_base64sha256

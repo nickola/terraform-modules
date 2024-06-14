@@ -13,6 +13,18 @@ variable "handler" {
   type        = string
 }
 
+variable "memory" {
+  description = "Memory (MB)."
+  type        = number
+  default     = 128
+}
+
+variable "timeout" {
+  description = "Timeout (seconds)."
+  type        = number
+  default     = 3
+}
+
 variable "source_file" {
   description = "Source file."
   type        = string
