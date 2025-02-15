@@ -26,7 +26,7 @@ data "archive_file" "lambda_archive" {
   source_dir  = var.source_directory
   source_file = var.source_file
   output_path = "_lambda/lambda-${var.name}.zip"
-  excludes    = var.source_file == null ? var.source_directory_excludes : null
+  excludes    = var.source_file != null ? null : setunion(coalesce(var.source_directory_excludes_always, []), coalesce(var.source_directory_excludes, []))
 }
 
 resource "aws_lambda_function" "lambda" {

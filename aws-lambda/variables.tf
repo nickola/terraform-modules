@@ -37,10 +37,16 @@ variable "source_directory" {
   default     = null
 }
 
+variable "source_directory_excludes_always" {
+  description = "Source directory excludes (always)."
+  type        = list(string)
+  default     = ["**/.git*", "**/*.env", "**/Makefile", "**/*.code-workspace", "**/.venv", "**/__pycache__", "**/*.pyc"]
+}
+
 variable "source_directory_excludes" {
   description = "Source directory excludes."
   type        = list(string)
-  default     = [".git", ".gitignore", ".gitmodules", ".venv"]
+  default     = null
 }
 
 variable "environment" {
