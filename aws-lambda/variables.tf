@@ -25,6 +25,12 @@ variable "timeout" {
   default     = 3
 }
 
+variable "architecture" {
+  description = "Architecture."
+  type        = string
+  default     = "x86_64"
+}
+
 variable "source_file" {
   description = "Source file."
   type        = string
@@ -61,8 +67,20 @@ variable "url_enabled" {
   default     = false
 }
 
+variable "log_retention" {
+  description = "Lambda log retention (days)."
+  type        = number
+  default     = 30
+}
+
 variable "policy" {
   description = "Lambda role policy."
   type        = string
+  default     = null
+}
+
+variable "policy_attachments" {
+  description = "Lambda role policy attachments (example: arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole)."
+  type        = list(string)
   default     = null
 }

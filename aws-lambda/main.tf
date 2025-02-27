@@ -33,6 +33,7 @@ resource "aws_lambda_function" "lambda" {
   role = aws_iam_role.lambda_role.arn
 
   function_name = var.name
+  architectures = [var.architecture]
   runtime       = var.runtime
   handler       = var.handler
   memory_size   = var.memory
@@ -53,7 +54,31 @@ resource "aws_lambda_function_url" "lambda_url" {
   authorization_type = "NONE"
 }
 
-# Policy
+# Log group
+resource "aws_cloudwatch_log_group" "lambda_log_group" {
+  name              = "/aws/lambda/${var.name}"
+  retention_in_days = var.log_retention
+}
+
+data "aws_iam_policy_document" "lambda_log_group_policy_document" {
+  statement {
+    effect    = "Allow"
+    actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
+    resources = ["${aws_cloudwatch_log_group.lambda_log_group.arn}:*"]
+  }
+}
+
+resource "aws_iam_policy" "lambda_log_group_policy" {
+  name   = "${var.name}-lambda-log-group-policy"
+  policy = data.aws_iam_policy_document.lambda_log_group_policy_document.json
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_log_group_policy_attachment" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = aws_iam_policy.lambda_log_group_policy.arn
+}
+
+# Custom policy
 resource "aws_iam_policy" "lambda_policy" {
   count = var.policy != null ? 1 : 0
 
@@ -61,11 +86,18 @@ resource "aws_iam_policy" "lambda_policy" {
   policy = var.policy
 }
 
-resource "aws_iam_role_policy_attachment" "test-attach" {
+resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
   count = var.policy != null ? 1 : 0
 
   role       = aws_iam_role.lambda_role.name
   policy_arn = aws_iam_policy.lambda_policy[0].arn
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_policy_attachments" {
+  for_each = var.policy_attachments != null ? toset(var.policy_attachments) : []
+
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = each.value
 }
 
 # Output
@@ -79,7 +111,10 @@ output "url" {
 
 output "status" {
   value = {
-    lambda_arn = aws_lambda_function.lambda.arn
-    lambda_url = var.url_enabled ? aws_lambda_function_url.lambda_url[0].function_url : ""
+    lambda_arn           = aws_lambda_function.lambda.arn
+    lambda_url           = var.url_enabled ? aws_lambda_function_url.lambda_url[0].function_url : ""
+    lambda_runtime       = aws_lambda_function.lambda.runtime
+    lambda_memory_size   = aws_lambda_function.lambda.memory_size
+    lambda_architectures = aws_lambda_function.lambda.architectures
   }
 }
