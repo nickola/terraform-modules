@@ -38,7 +38,6 @@ resource "aws_acm_certificate" "certificate" {
   }
 }
 
-# CloudFront
 resource "aws_cloudfront_distribution" "cloudfront_distribution" {
   enabled         = true
   is_ipv6_enabled = true
@@ -148,6 +147,7 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
 
       forwarded_values {
         query_string = true
+        headers      = lookup(ordered_cache_behavior.value, "forwarded_headers", null)
 
         cookies {
           forward = "none"

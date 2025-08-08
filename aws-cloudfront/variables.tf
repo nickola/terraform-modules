@@ -90,13 +90,14 @@ variable "error_html" {
 variable "rules" {
   description = "Rules."
   type = list(object({
-    url             = string,
-    lambda_url      = string,
-    allowed_methods = optional(list(string)),
-    cached_methods  = optional(list(string)),
-    ttl             = optional(number),
-    ttl_min         = optional(number),
-    ttl_max         = optional(number)
+    url               = string,
+    lambda_url        = string,
+    forwarded_headers = optional(list(string)),
+    allowed_methods   = optional(list(string)),
+    cached_methods    = optional(list(string)),
+    ttl               = optional(number),
+    ttl_min           = optional(number),
+    ttl_max           = optional(number)
   }))
   default = null
 }
