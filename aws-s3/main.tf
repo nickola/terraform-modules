@@ -53,8 +53,8 @@ resource "aws_s3_bucket_website_configuration" "website" {
 locals {
   content_exclude = flatten([
     for pattern in setunion(coalesce(var.content_directory_exclude_always, []), coalesce(var.content_directory_exclude, [])) : [
-      "^${replace(replace(replace(replace(pattern, ".", "\\."), "**/", "__DOUBLE_STAR__"), "*", "[^/]*"), "__DOUBLE_STAR__", ".*")}$",
-      "^${replace(replace(replace(replace(pattern, ".", "\\."), "**/", "__DOUBLE_STAR__"), "*", "[^/]*"), "__DOUBLE_STAR__", ".*")}/.*$"
+      "^${replace(replace(replace(replace(pattern, ".", "\\."), "**/", "[__[DOUBLE_STAR]__]"), "*", "[^/]*"), "[__[DOUBLE_STAR]__]", ".*")}$",
+      "^${replace(replace(replace(replace(pattern, ".", "\\."), "**/", "[__[DOUBLE_STAR]__]"), "*", "[^/]*"), "[__[DOUBLE_STAR]__]", ".*")}/.*$"
     ]
   ])
 
