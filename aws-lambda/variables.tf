@@ -43,16 +43,16 @@ variable "source_directory" {
   default     = null
 }
 
-variable "source_directory_excludes_always" {
-  description = "Source directory excludes (always)."
-  type        = list(string)
-  default     = ["**/.git*", "**/*.env", "**/Makefile", "**/*.code-workspace", "**/.venv", "**/__pycache__", "**/*.pyc"]
-}
-
-variable "source_directory_excludes" {
-  description = "Source directory excludes."
+variable "source_directory_exclude" {
+  description = "Source directory exclude."
   type        = list(string)
   default     = null
+}
+
+variable "source_directory_exclude_always" {
+  description = "Source directory exclude (always)."
+  type        = list(string)
+  default     = ["**/.DS_Store", "**/.git*", "**/*.env", "**/Makefile", "**/*.code-workspace", "**/.venv", "**/__pycache__", "**/*.pyc"]
 }
 
 variable "environment" {

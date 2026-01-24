@@ -23,6 +23,17 @@ variable "content_directory" {
   default     = null
 }
 
+variable "content_directory_exclude" {
+  description = "Content directory exclude."
+  type        = list(string)
+  default     = null
+}
+variable "content_directory_exclude_always" {
+  description = "Content directory exclude (always)."
+  type        = list(string)
+  default     = ["**/.DS_Store", "**/.git*", "**/*.env", "**/Makefile", "**/*.code-workspace", "**/.venv", "**/__pycache__", "**/*.pyc"]
+}
+
 variable "default_content_type" {
   type        = string
   description = "Default content type."

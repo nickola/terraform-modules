@@ -51,12 +51,19 @@ resource "aws_s3_bucket_website_configuration" "website" {
 
 # Content
 locals {
+  content_exclude = flatten([
+    for pattern in setunion(coalesce(var.content_directory_exclude_always, []), coalesce(var.content_directory_exclude, [])) : [
+      "^${replace(replace(replace(replace(pattern, ".", "\\."), "**/", "__DOUBLE_STAR__"), "*", "[^/]*"), "__DOUBLE_STAR__", ".*")}$",
+      "^${replace(replace(replace(replace(pattern, ".", "\\."), "**/", "__DOUBLE_STAR__"), "*", "[^/]*"), "__DOUBLE_STAR__", ".*")}/.*$"
+    ]
+  ])
+
   content_files = var.content_directory == null ? {} : {
-    for path in fileset(var.content_directory, "**") : path => {
-      path         = "${var.content_directory}/${path}"
-      md5          = filemd5("${var.content_directory}/${path}")
-      content_type = lookup(var.content_types, try(lower(element(regexall("\\.[^.]+$", path), 0)), ""), var.default_content_type)
-    }
+    for file_path in fileset(var.content_directory, "**") : file_path => {
+      full_path    = "${var.content_directory}/${file_path}"
+      md5          = filemd5("${var.content_directory}/${file_path}")
+      content_type = lookup(var.content_types, try(lower(element(regexall("\\.[^.]+$", file_path), 0)), ""), var.default_content_type)
+    } if !anytrue([for regex in local.content_exclude : can(regex(regex, file_path))])
   }
 }
 
@@ -69,7 +76,7 @@ resource "aws_s3_object" "content_files" {
   }
 
   key          = each.key
-  source       = each.value.path
+  source       = each.value.full_path
   content_type = each.value.content_type
   etag         = each.value.md5
 }
