@@ -1,57 +1,89 @@
-# S3 access
-resource "aws_cloudfront_origin_access_identity" "cloudfront_access_identity" {
-  comment = var.description
+locals {
+  s3_bucket_name = "cloudfront-static-${var.name}"
 }
 
-# S3 files
-data "aws_s3_bucket" "bucket" {
-  bucket = var.s3_bucket_id
+# Identity
+resource "aws_cloudfront_origin_access_identity" "cloudfront_access_identity" {
+  comment = var.name
+}
+
+# S3
+module "s3_bucket" {
+  source = "../aws-s3"
+  bucket = local.s3_bucket_name
+
+  content_directory = var.content_directory
+  website_redirect  = var.redirect
+
+  policy = var.redirect != null ? null : [
+    {
+      Sid      = "CloudfrontRead"
+      Effect   = "Allow"
+      Action   = ["s3:GetObject"]
+      Resource = ["${module.s3_bucket.bucket.arn}/*"]
+      Principal = {
+        AWS = ["${aws_cloudfront_origin_access_identity.cloudfront_access_identity.iam_arn}"]
+      }
+    }
+  ]
 }
 
 resource "aws_s3_object" "index_file" {
-  count = (var.s3_bucket_id != "" && var.index_file != "" && var.index_html != "") ? 1 : 0
+  count = (var.index_file != "" && var.index_html != null) ? 1 : 0
 
-  bucket       = var.s3_bucket_id
+  tags = {
+    Owner = "Terraform"
+  }
+
+  bucket       = module.s3_bucket.bucket.id
   key          = var.index_file
   content      = var.index_html
   content_type = "text/html"
 }
 
 resource "aws_s3_object" "error_file" {
-  count = (var.s3_bucket_id != "" && var.error_file != "" && var.error_html != "") ? 1 : 0
+  count = (var.error_file != "" && var.error_html != null) ? 1 : 0
 
-  bucket       = var.s3_bucket_id
+  tags = {
+    Owner = "Terraform"
+  }
+
+  bucket       = module.s3_bucket.bucket.id
   key          = var.error_file
   content      = var.error_html
   content_type = "text/html"
 }
 
 # Certificate
-resource "aws_acm_certificate" "certificate" {
-  count = var.domain_alias != null ? 1 : 0
+module "certificate" {
+  source = "../aws-certificate"
+  count  = var.domain != null ? 1 : 0
 
-  domain_name       = var.domain_alias
-  validation_method = "DNS"
-
-  lifecycle {
-    create_before_destroy = true
-  }
+  domain = var.domain
 }
 
 resource "aws_cloudfront_distribution" "cloudfront_distribution" {
   enabled         = true
   is_ipv6_enabled = true
 
-  aliases = var.domain_alias != null ? [var.domain_alias] : []
+  aliases = var.domain != null ? [var.domain] : []
 
-  comment             = var.description
+  comment             = var.name
   price_class         = var.price_class
-  default_root_object = var.index_file
+  default_root_object = var.redirect == null ? var.index_file : null
 
-  custom_error_response {
-    error_code         = 403
-    response_code      = 404
-    response_page_path = "/${var.error_file}"
+  tags = {
+    Name = var.name
+  }
+
+  dynamic "custom_error_response" {
+    for_each = var.redirect == null ? ["+"] : []
+
+    content {
+      error_code         = 403
+      response_code      = 404
+      response_page_path = "/${var.error_file}"
+    }
   }
 
   # Restrictions
@@ -64,7 +96,7 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
 
   # Certificate
   dynamic "viewer_certificate" {
-    for_each = var.domain_alias == null ? ["+"] : []
+    for_each = var.domain == null ? ["+"] : []
 
     content {
       cloudfront_default_certificate = true
@@ -72,21 +104,37 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
   }
 
   dynamic "viewer_certificate" {
-    for_each = var.domain_alias != null ? ["+"] : []
+    for_each = var.domain != null ? ["+"] : []
 
     content {
       ssl_support_method  = "sni-only"
-      acm_certificate_arn = aws_acm_certificate.certificate[0].arn
+      acm_certificate_arn = module.certificate[0].certificate.arn
     }
   }
 
   # Default origin / behavior
   origin {
     origin_id   = "default-s3"
-    domain_name = data.aws_s3_bucket.bucket.bucket_regional_domain_name
+    domain_name = var.redirect == null ? module.s3_bucket.bucket.bucket_regional_domain_name : module.s3_bucket.bucket_website_configuration.website_endpoint
 
-    s3_origin_config {
-      origin_access_identity = aws_cloudfront_origin_access_identity.cloudfront_access_identity.cloudfront_access_identity_path
+    dynamic "s3_origin_config" {
+      for_each = var.redirect == null ? ["+"] : []
+
+      content {
+        origin_access_identity = aws_cloudfront_origin_access_identity.cloudfront_access_identity.cloudfront_access_identity_path
+      }
+    }
+
+    dynamic "custom_origin_config" {
+      for_each = var.redirect != null ? ["+"] : []
+
+      content {
+        http_port  = 80
+        https_port = 443
+
+        origin_protocol_policy = "http-only"
+        origin_ssl_protocols   = ["TLSv1.2"]
+      }
     }
   }
 
@@ -158,8 +206,12 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
 }
 
 # Outputs
-output "access_identity" {
-  value = aws_cloudfront_origin_access_identity.cloudfront_access_identity.iam_arn
+output "s3_bucket" {
+  value = module.s3_bucket.bucket
+}
+
+output "cloudfront_access_identity" {
+  value = aws_cloudfront_origin_access_identity.cloudfront_access_identity
 }
 
 output "status" {

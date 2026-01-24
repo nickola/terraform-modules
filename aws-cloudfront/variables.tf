@@ -1,10 +1,59 @@
-# CloudFront
-variable "description" {
-  description = "Description."
+variable "name" {
+  description = "Name."
+  type        = string
+}
+
+variable "domain" {
+  description = "Domain."
   type        = string
   default     = null
 }
 
+variable "redirect" {
+  description = "Redirect domain."
+  type        = string
+  default     = null
+}
+
+variable "redirect_protocol" {
+  description = "Redirect protocol."
+  type        = string
+  default     = "https"
+}
+
+# Content
+variable "content_directory" {
+  description = "Content directory (S3 files)."
+  type        = string
+  default     = null
+}
+
+# HTML files
+variable "index_file" {
+  description = "Index file."
+  type        = string
+  default     = "_index.html"
+}
+
+variable "index_html" {
+  description = "Index file content."
+  type        = string
+  default     = null
+}
+
+variable "error_file" {
+  description = "Error (404) file."
+  type        = string
+  default     = "_404.html"
+}
+
+variable "error_html" {
+  description = "Error (404) file content."
+  type        = string
+  default     = null
+}
+
+# CloudFront
 variable "price_class" {
   description = "Price class."
   type        = string
@@ -29,19 +78,6 @@ variable "geo_restriction" {
   default     = null
 }
 
-# S3
-variable "s3_bucket_id" {
-  description = "S3 bucket ID."
-  type        = string
-  default     = ""
-}
-
-variable "domain_alias" {
-  description = "Alias domain name."
-  type        = string
-  default     = null
-}
-
 # TTL
 variable "ttl" {
   description = "TTL."
@@ -59,31 +95,6 @@ variable "ttl_max" {
   description = "Maximum TTL."
   type        = number
   default     = null
-}
-
-# HTML files
-variable "index_file" {
-  description = "Index file."
-  type        = string
-  default     = "_index.html"
-}
-
-variable "index_html" {
-  description = "Index file content."
-  type        = string
-  default     = ""
-}
-
-variable "error_file" {
-  description = "Error (404) file."
-  type        = string
-  default     = "_404.html"
-}
-
-variable "error_html" {
-  description = "Error (404) file content."
-  type        = string
-  default     = ""
 }
 
 # Rules
