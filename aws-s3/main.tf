@@ -71,10 +71,6 @@ resource "aws_s3_object" "content_files" {
   for_each = local.content_files
   bucket   = aws_s3_bucket.bucket.id
 
-  tags = {
-    Owner = "Terraform"
-  }
-
   key          = each.key
   source       = each.value.full_path
   content_type = each.value.content_type

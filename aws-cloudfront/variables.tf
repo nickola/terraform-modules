@@ -10,9 +10,15 @@ variable "domain" {
 }
 
 variable "redirect" {
-  description = "Redirect domain."
+  description = "Redirect URL."
   type        = string
   default     = null
+}
+
+variable "redirect_as_function" {
+  description = "Redirect as function."
+  type        = string
+  default     = false
 }
 
 variable "redirect_protocol" {
@@ -32,7 +38,7 @@ variable "content_directory" {
 variable "index_file" {
   description = "Index file."
   type        = string
-  default     = "_index.html"
+  default     = null
 }
 
 variable "index_html" {
@@ -44,7 +50,7 @@ variable "index_html" {
 variable "error_file" {
   description = "Error (404) file."
   type        = string
-  default     = "_404.html"
+  default     = null
 }
 
 variable "error_html" {
