@@ -62,9 +62,15 @@ locals {
     for file_path in fileset(var.content_directory, "**") : file_path => {
       full_path    = "${var.content_directory}/${file_path}"
       md5          = filemd5("${var.content_directory}/${file_path}")
-      content_type = lookup(var.content_types, try(lower(element(regexall("\\.[^.]+$", file_path), 0)), ""), var.default_content_type)
     } if !anytrue([for regex in local.content_exclude : can(regex(regex, file_path))])
   }
+}
+
+module "content_type" {
+  source   = "../content_type"
+  for_each = local.content_files
+
+  file = each.value.full_path
 }
 
 resource "aws_s3_object" "content_files" {
@@ -73,7 +79,7 @@ resource "aws_s3_object" "content_files" {
 
   key          = each.key
   source       = each.value.full_path
-  content_type = each.value.content_type
+  content_type = module.content_type[each.key].content_type
   etag         = each.value.md5
 }
 

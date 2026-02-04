@@ -34,6 +34,12 @@ variable "content_directory" {
   default     = null
 }
 
+variable "content_directory_exclude" {
+  description = "Content directory exclude."
+  type        = list(string)
+  default     = null
+}
+
 # HTML files
 variable "index_file" {
   description = "Index file."

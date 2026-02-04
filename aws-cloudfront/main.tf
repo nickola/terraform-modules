@@ -19,8 +19,10 @@ module "s3_bucket" {
   source = "../aws-s3"
   bucket = "cloudfront-static-${local.name_clean}"
 
-  content_directory = var.content_directory
-  website_redirect  = local.with_redirect_as_not_function ? var.redirect : null
+  content_directory         = var.content_directory
+  content_directory_exclude = var.content_directory_exclude
+
+  website_redirect = local.with_redirect_as_not_function ? var.redirect : null
 
   policy = local.with_redirect_as_not_function ? null : [
     {
