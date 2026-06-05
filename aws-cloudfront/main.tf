@@ -7,6 +7,8 @@ locals {
   with_redirect = var.redirect != null
   with_redirect_as_function = local.with_redirect && var.redirect_as_function
   with_redirect_as_not_function = local.with_redirect && !var.redirect_as_function
+
+  ttl = coalesce(var.ttl, 0)
 }
 
 # Identity
@@ -169,9 +171,9 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
     cached_methods         = coalesce(var.cached_methods, var.allowed_methods)
     compress               = true
 
-    default_ttl = var.ttl
-    min_ttl     = var.ttl_min != null ? var.ttl_min : var.ttl
-    max_ttl     = var.ttl_max != null ? var.ttl_max : var.ttl
+    default_ttl = local.ttl
+    min_ttl     = var.ttl_min != null ? var.ttl_min : local.ttl
+    max_ttl     = var.ttl_max != null ? var.ttl_max : local.ttl
 
     forwarded_values {
       query_string = false
@@ -221,9 +223,9 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
       cached_methods         = coalesce(lookup(ordered_cache_behavior.value, "cached_methods", null), coalesce(lookup(ordered_cache_behavior.value, "allowed_methods", null), coalesce(var.cached_methods, var.allowed_methods)))
       compress               = true
 
-      default_ttl = coalesce(lookup(ordered_cache_behavior.value, "ttl", null), var.ttl)
-      min_ttl     = coalesce(lookup(ordered_cache_behavior.value, "ttl_min", null), coalesce(lookup(ordered_cache_behavior.value, "ttl", null), var.ttl_min != null ? var.ttl_min : var.ttl))
-      max_ttl     = coalesce(lookup(ordered_cache_behavior.value, "ttl_max", null), coalesce(lookup(ordered_cache_behavior.value, "ttl", null), var.ttl_max != null ? var.ttl_max : var.ttl))
+      default_ttl = coalesce(lookup(ordered_cache_behavior.value, "ttl", null), local.ttl)
+      min_ttl     = coalesce(lookup(ordered_cache_behavior.value, "ttl_min", null), coalesce(lookup(ordered_cache_behavior.value, "ttl", null), var.ttl_min != null ? var.ttl_min : local.ttl))
+      max_ttl     = coalesce(lookup(ordered_cache_behavior.value, "ttl_max", null), coalesce(lookup(ordered_cache_behavior.value, "ttl", null), var.ttl_max != null ? var.ttl_max : local.ttl))
 
       forwarded_values {
         query_string = true
