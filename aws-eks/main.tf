@@ -1,5 +1,5 @@
 # Region
-data "aws_region" "current" {}
+data "aws_region" "region" {}
 
 module "eks_vpc" {
   source  = "terraform-aws-modules/vpc/aws" # AWS VPC module (supported by community)
@@ -7,7 +7,7 @@ module "eks_vpc" {
 
   name = "${var.name}-vpc"
   cidr = var.vpc_cidr
-  azs  = formatlist("${data.aws_region.current.region}%s", var.vpc_availability_zones)
+  azs  = formatlist("${data.aws_region.region.region}%s", var.vpc_availability_zones)
 
   private_subnets      = var.vpc_private_subnets
   public_subnets       = var.vpc_public_subnets
