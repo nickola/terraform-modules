@@ -60,8 +60,8 @@ locals {
 
   content_files = var.content_directory == null ? {} : {
     for file_path in fileset(var.content_directory, "**") : file_path => {
-      full_path    = "${var.content_directory}/${file_path}"
-      md5          = filemd5("${var.content_directory}/${file_path}")
+      full_path = "${var.content_directory}/${file_path}"
+      md5       = filemd5("${var.content_directory}/${file_path}")
     } if !anytrue([for regex in local.content_exclude : can(regex(regex, file_path))])
   }
 }

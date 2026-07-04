@@ -1,9 +1,9 @@
 resource "aws_budgets_budget" "budget" {
-  name              = var.name
-  budget_type       = var.type
-  time_unit         = var.time
-  limit_unit        = var.limit_unit
-  limit_amount      = var.limit
+  name         = var.name
+  budget_type  = var.type
+  time_unit    = var.time
+  limit_unit   = var.limit_unit
+  limit_amount = var.limit
 
   dynamic "notification" {
     for_each = (var.preliminary_alert == true && var.preliminary_alert_percent != null) ? ["+"] : []

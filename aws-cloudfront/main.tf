@@ -4,8 +4,8 @@ locals {
   index_file = coalesce(var.index_file, "index.html")
   error_file = coalesce(var.error_file, "404.html")
 
-  with_redirect = var.redirect != null
-  with_redirect_as_function = local.with_redirect && var.redirect_as_function
+  with_redirect                 = var.redirect != null
+  with_redirect_as_function     = local.with_redirect && var.redirect_as_function
   with_redirect_as_not_function = local.with_redirect && !var.redirect_as_function
 
   ttl = coalesce(var.ttl, 0)
@@ -187,7 +187,7 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
       for_each = local.with_redirect_as_function ? ["+"] : []
 
       content {
-        event_type = "viewer-request"
+        event_type   = "viewer-request"
         function_arn = aws_cloudfront_function.redirect[0].arn
       }
     }

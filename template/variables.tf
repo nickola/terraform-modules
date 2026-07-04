@@ -5,5 +5,5 @@ variable "file" {
 
 variable "data" {
   description = "Template data."
-  type        = map
+  type        = map(any)
 }

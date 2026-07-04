@@ -6,14 +6,14 @@ variable "name" {
 # VPC (Virtual Private Cloud) configuration
 variable "vpc_cidr" {
   description = "VPC CIDR block"
-  type = string
-  default = "10.0.0.0/16"
+  type        = string
+  default     = "10.0.0.0/16"
 }
 
 variable "vpc_availability_zones" {
   description = "VPC availability zones"
-  type = list(string)
-  default = ["a", "b"]
+  type        = list(string)
+  default     = ["a", "b"]
   validation {
     condition     = length(var.vpc_availability_zones) >= 2
     error_message = "At least 2 VPC availability zones are required"
@@ -22,21 +22,21 @@ variable "vpc_availability_zones" {
 
 variable "vpc_private_subnets" {
   description = "Private subnets (not less than number of 'vpc_availability_zones')"
-  type = list(string)
-  default = ["10.0.1.0/24", "10.0.2.0/24"]
+  type        = list(string)
+  default     = ["10.0.1.0/24", "10.0.2.0/24"]
 }
 
 variable "vpc_public_subnets" {
   description = "Public subnets (not less than number of 'vpc_availability_zones')"
-  type = list(string)
-  default = ["10.0.101.0/24", "10.0.102.0/24"]
+  type        = list(string)
+  default     = ["10.0.101.0/24", "10.0.102.0/24"]
 }
 
 # EKS (Elastic Kubernetes Service) configuration
 variable "eks_version" {
   description = "EKS version"
-  type = string
-  default = "1.36"
+  type        = string
+  default     = "1.36"
 }
 
 variable "eks_node_groups" {
