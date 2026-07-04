@@ -11,3 +11,9 @@ resource "aws_route53_record" "record" {
   ttl     = each.value.ttl
   records = each.value.values
 }
+
+output "status" {
+  value = {
+    name_servers = aws_route53_zone.zone.name_servers
+  }
+}

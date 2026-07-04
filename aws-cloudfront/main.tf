@@ -248,10 +248,16 @@ output "cloudfront_access_identity" {
   value = aws_cloudfront_origin_access_identity.cloudfront_access_identity
 }
 
-output "status" {
+output "details" {
   value = {
     aliases     = aws_cloudfront_distribution.cloudfront_distribution.aliases
-    domain      = aws_cloudfront_distribution.cloudfront_distribution.domain_name
     price_class = aws_cloudfront_distribution.cloudfront_distribution.price_class
+  }
+}
+
+output "status" {
+  value = {
+    domain                 = aws_cloudfront_distribution.cloudfront_distribution.domain_name
+    certificate_validation = var.domain != null ? module.certificate[0].certificate.domain_validation_options : []
   }
 }
